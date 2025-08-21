@@ -2,51 +2,57 @@ package utils
 
 import (
 	"fmt"
-	"io"
 	"net/http"
+	"strconv"
 	"time"
-
-	"github.com/beevik/etree"
 )
 
 const (
-	bingURL        = `https://www.bing.com`
-	bingAPI        = `https://www.bing.com/HPImageArchive.aspx?format=xml&idx=%d&n=1&mkt=%s`
-	bingResolution = `UHD`
+	picReAPI = `https://pic.re/image`
 )
 
-func FetchBingWallpaper() (string, error) {
-
+func FetchAnimeWallpaper(maxSize int) (string, error) {
 	client := &http.Client{
-		Timeout: 5 * time.Second,
+		Timeout: 10 * time.Second,
 	}
 
-	request, err := http.NewRequest(http.MethodGet, fmt.Sprintf(bingAPI, 0, "fr-FR"), nil)
+	url := picReAPI
+	if maxSize > 0 {
+		url = fmt.Sprintf("%s?max_size=%d", picReAPI, maxSize)
+	}
+
+	request, err := http.NewRequest(http.MethodGet, url, nil)
 	if err != nil {
 		return "", err
 	}
-	request.Header.Add("Referer", bingURL)
-	request.Header.Add("User-Agent", `Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/106.0.0.0 Safari/537.36`)
-	request.Header.Add("Accept", `application/xml`)
+	request.Header.Add("User-Agent", `Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36`)
 
 	resp, err := client.Do(request)
 	if err != nil || resp.StatusCode != http.StatusOK {
-		return "", err
+		return "", fmt.Errorf("failed to fetch wallpaper from pic.re: %v", err)
 	}
 	defer resp.Body.Close()
 
-	body, err := io.ReadAll(resp.Body)
-	if err != nil || len(body) == 0 {
-		return "", fmt.Errorf("failed to parse request body from %s", bingURL)
+	// pic.re redirects to the actual image URL
+	return resp.Request.URL.String(), nil
+}
+
+// Legacy function for backward compatibility
+func FetchBingWallpaper() (string, error) {
+	return FetchAnimeWallpaper(1920)
+}
+
+// Parse max_size from request query parameter
+func ParseMaxSize(r *http.Request) int {
+	maxSizeStr := r.URL.Query().Get("max_size")
+	if maxSizeStr == "" {
+		return 1920 // Default to 1920 for HD
 	}
-
-	doc := etree.NewDocument()
-	if err := doc.ReadFromBytes(body); err != nil {
-		return "", err
+	
+	maxSize, err := strconv.Atoi(maxSizeStr)
+	if err != nil || maxSize < 256 || maxSize > 4096 {
+		return 1920 // Fallback to safe default
 	}
-
-	// get image element
-	imgElem := doc.SelectElement("images").SelectElement("image")
-
-	return fmt.Sprintf("%s%s_%s%s", bingURL, imgElem.SelectElement("urlBase").Text(), bingResolution, ".jpg"), nil
+	
+	return maxSize
 }

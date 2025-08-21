@@ -23,7 +23,7 @@ document.body.style.backgroundImage = `url(${state.url})`;
 const today = new Date();
 today.setHours(0, 0, 0, 0);
 if (today.getDate() !== new Date(state.time).getDate()) {
-  applyBingWallpaper();
+  applyAnimeWallpaper();
 }
 
 // Reset the wallpaper to the base wallpaper
@@ -34,17 +34,33 @@ function resetWallpaper() {
   document.body.style.backgroundImage = `url(${baseWallpaper})`;
 }
 
-async function applyBingWallpaper() {
+// Get screen resolution to optimize wallpaper size
+function getOptimalMaxSize(): number {
+  const screenWidth = window.screen.width;
+  const screenHeight = window.screen.height;
+  const maxDimension = Math.max(screenWidth, screenHeight);
+  
+  // Round up to nearest common resolution
+  if (maxDimension <= 1920) return 1920;
+  if (maxDimension <= 2560) return 2560;
+  if (maxDimension <= 3840) return 3840;
+  return 4096; // For 4K+ displays
+}
+
+async function applyAnimeWallpaper() {
   try {
+    const maxSize = getOptimalMaxSize();
     const { wallpaper } = await jsonFetch<{ wallpaper: string }>(
-      "/api/wallpaper"
+      `/api/wallpaper?max_size=${maxSize}`
     );
     state.url = wallpaper;
     state.time = today.getTime();
     localStorage.setItem(storageKey, JSON.stringify(state));
     document.body.style.backgroundImage = `url(${wallpaper})`;
   } catch (e) {
-    console.error(e);
+    console.error("Failed to fetch anime wallpaper:", e);
+    // Fallback to base wallpaper on error
+    resetWallpaper();
   }
 }
 
@@ -56,7 +72,7 @@ export function SearchWallpaperButton() {
   const toggleWallpaper = () => {
     if (state.url === baseWallpaper) {
       isLoading.value = true;
-      applyBingWallpaper().finally(() => (isLoading.value = false));
+      applyAnimeWallpaper().finally(() => (isLoading.value = false));
     } else {
       resetWallpaper();
     }

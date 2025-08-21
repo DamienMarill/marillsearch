@@ -17,7 +17,12 @@
       "Bash(rm:*)",
       "Bash(chmod:*)",
       "Bash(./make.sh:*)",
-      "Bash(powershell:*)"
+      "Bash(powershell:*)",
+      "WebFetch(domain:danbooru.donmai.us)",
+      "WebFetch(domain:pic.re)",
+      "WebFetch(domain:doc.pic.re)",
+      "Bash(templ generate:*)",
+      "Bash(bun run:*)"
     ],
     "deny": [],
     "ask": [],

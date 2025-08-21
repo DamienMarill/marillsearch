@@ -11,12 +11,15 @@ type wallpaperResponse struct {
 }
 
 func WallpaperHandler(w http.ResponseWriter, r *http.Request) {
-	wallpaper, err := utils.FetchBingWallpaper()
+	// Parse max_size parameter from query
+	maxSize := utils.ParseMaxSize(r)
+
+	wallpaper, err := utils.FetchAnimeWallpaper(maxSize)
 	if err != nil {
 		serveError(w, err)
 		return
 	}
-	w.Header().Set("Cache-Control", "public, max-age=3600")
+	w.Header().Set("Cache-Control", "public, max-age=300") // 5 minutes cache for anime variety
 	j, _ := json.Marshal(wallpaperResponse{Wallpaper: wallpaper})
 	w.Write(j)
 }
