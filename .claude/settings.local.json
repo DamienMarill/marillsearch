@@ -1,0 +1,28 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(go mod:*)",
+      "Bash(bun install:*)",
+      "Bash(go install:*)",
+      "Bash(npm install)",
+      "Bash(templ version:*)",
+      "Bash(go:*)",
+      "Bash(node:*)",
+      "Bash(echo $PATH)",
+      "Bash(where make)",
+      "Bash(make:*)",
+      "Bash(pacman:*)",
+      "Bash(choco install:*)",
+      "Bash(curl:*)",
+      "Bash(rm:*)",
+      "Bash(chmod:*)",
+      "Bash(./make.sh:*)",
+      "Bash(powershell:*)"
+    ],
+    "deny": [],
+    "ask": [],
+    "additionalDirectories": [
+      "C:\\usr"
+    ]
+  }
+}
