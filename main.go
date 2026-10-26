@@ -26,6 +26,12 @@ var linuxService string
 const port = ":8042"
 
 func main() {
+	// Initialize logger
+	if err := utils.InitLogger(); err != nil {
+		log.Printf("Warning: Failed to initialize file logging: %v", err)
+	}
+	defer utils.CloseLogger()
+
 	// Handle "install" flag
 	if len(os.Args) >= 2 && os.Args[1] == "install" {
 		err := utils.InstallApp(linuxService, macOSService)
@@ -53,6 +59,9 @@ func main() {
 	http.HandleFunc("/api/ddg", api.SearchWithParser(search.GetDDGResults))
 	http.HandleFunc("/api/brave", api.SearchWithParser(search.GetBraveResults))
 	http.HandleFunc("/api/wallpaper", api.WallpaperHandler)
+	
+	// Image Search API - Pinterest only
+	http.HandleFunc("/api/images/pinterest", api.ImageSearchWithParser(search.GetPinterestImageResults))
 
 	// FrontEnd URLs
 	http.HandleFunc("/weather", server.WeatherHandler)
