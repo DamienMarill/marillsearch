@@ -22,7 +22,11 @@
       "WebFetch(domain:pic.re)",
       "WebFetch(domain:doc.pic.re)",
       "Bash(templ generate:*)",
-      "Bash(bun run:*)"
+      "Bash(bun run:*)",
+      "WebFetch(domain:www.google.com)",
+      "Bash(npm run build:*)",
+      "WebSearch",
+      "WebFetch(domain:developers.pinterest.com)"
     ],
     "deny": [],
     "ask": [],
